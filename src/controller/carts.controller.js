@@ -1,4 +1,5 @@
-import { cartModel } from "../models/carts.models.js";
+import { cartModel } from '../models/carts.models.js';
+import { productModel } from '../models/products.models.js';
 import mongoose from 'mongoose';
 
 // GET api/carts/:cid - Obtener productos en un carrito
@@ -50,61 +51,88 @@ export const deleteProductCart = async (req, res) => { // Cambiado a cartRoute
     }
   };
 
- // PUT api/carts/:cid - Actualizar carrito con arreglo de productos
- export const putCart = async (req, res) => { 
-  try {
-    const { cid, } = req.body;
-    const { products } = req.body;
-    const cart = await cartModel.findOneAndUpdate(
-      { _id: cid },
-      { products },
-      { new: true }
-    ).populate('products.id_prod');
-    
-    if (!cart) {
-      return res.status(404).json({ message: 'Carrito no encontrado' });
+
+
+  export const postCart = async (req, res) => {
+    try {
+      const { products } = req.body;
+  
+      if (!products || !Array.isArray(products) || products.length === 0) {
+        console.error('Productos no válidos');
+        return res.status(400).json({ respuesta: 'Error en crear Carrito', mensaje: 'Productos no válidos' });
+      }
+  
+      const productIds = products.map(product => product.id_prod);
+  
+      // Verificar si los productos existen en la base de datos
+      const existingProducts = await productModel.find({ _id: { $in: productIds } });
+  
+      if (existingProducts.length !== products.length) {
+        console.error('Algunos productos no fueron encontrados');
+        return res.status(404).json({ respuesta: 'Error en crear Carrito', mensaje: 'Algunos productos no fueron encontrados' });
+      }
+  
+      // Crear un nuevo carrito con los productos proporcionados
+      const cart = await cartModel.create({ products });
+  
+      console.log('Carrito creado:', cart);
+      res.status(200).json({ respuesta: 'OK', mensaje: cart });
+    } catch (error) {
+      console.error('Error al crear el carrito:', error);
+      res.status(400).json({ respuesta: 'Error en crear Carrito', mensaje: error.message });
     }
-    
-    res.json(cart);
+  };
+  
+
+
+
+export const postCartCID = async (req, res) => {
+  const { cid, pid } = req.params;
+  const { quantity } = req.body;
+
+  try {
+    // Obtener el carrito por ID
+    const cart = await cartModel.findById(cid);
+
+    if (!cart) {
+      // Si el carrito no existe, devuelve un error
+      return res.status(404).json({ respuesta: 'Error en agregar producto Carrito', mensaje: 'Carrito no encontrado' });
+    }
+
+    // Buscar el producto por ID
+    const prod = await productModel.findById(pid);
+
+    if (!prod) {
+      // Si el producto no existe, devuelve un error
+      return res.status(404).json({ respuesta: 'Error en agregar producto Carrito', mensaje: 'Producto no encontrado' });
+    }
+
+    // Buscar el índice del producto en el carrito
+    const indice = cart.products.findIndex(item => item.id_prod.toString() === pid);
+
+    if (indice !== -1) {
+      // Si el producto ya está en el carrito, actualiza la cantidad
+      cart.products[indice].quantity = quantity;
+    } else {
+      // Si el producto no está en el carrito, agrégalo
+      cart.products.push({ id_prod: pid, quantity: quantity });
+    }
+
+    // Actualizar el carrito en la base de datos
+    const respuesta = await cartModel.findByIdAndUpdate(cid, cart, { new: true });
+
+    // Enviar una respuesta exitosa
+    //res.status(200).json({ respuesta: 'OK', mensaje: respuesta });
+
+    //renderizo el carrito.
+    res.render('cartspecific', { cart });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error interno del servidor' });
+    // Capturar y manejar errores
+    console.error('Error en el controlador:', error);
+    res.status(500).json({ respuesta: 'Error en agregar producto Carrito', mensaje: error.message });
   }
 };
 
- // PUT api/carts/:cid/products/:pid - Actualizar cantidad de un producto en el carrito
-export const putCartQuantity = async (req, res) => {
-  try {
-    const { cid, pid } = req.params;
-    const { quantity } = req.body;
-
-    // Obtener el carrito asociado al usuario desde req.user
-    const userCart = req.user.cart;
-    console.log('Valor de userCart:', userCart);
-
-    // Verificar que el carrito sea válido
-    if (!userCart) {
-      return res.status(404).json({ message: 'Carrito no encontrado o producto no encontrado en el carrito' });
-    }
-
-    // Buscar el carrito por su ID (cartID) y verificar si el producto existe en el carrito
-    const cart = userCart.find((cartItem) => String(cartItem.id_prod) === pid);
-
-    if (!cart) {
-      return res.status(404).json({ message: 'Carrito no encontrado o producto no encontrado en el carrito' });
-    }
-
-    // Actualizar la cantidad del producto en el carrito
-    cart.quantity = quantity;
-
-    // Renderizar la vista carts.handlebars para mostrar el carrito
-    res.render('cartcartSpecific', { cart: userCart, productID: pid });
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error interno del servidor' });
-  }
-};
 
   // DELETE api/carts/:cid - Eliminar todos los productos del carrito
 

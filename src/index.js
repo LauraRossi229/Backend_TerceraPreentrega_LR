@@ -1,3 +1,5 @@
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '1';
+
 import 'dotenv/config'
 import express from 'express';
 import mongoose from 'mongoose';
@@ -19,7 +21,7 @@ import { cartModel } from './models/carts.models.js';
 import sessionRouter from './routes/session.routes.js';
 import bodyParser from 'body-parser';
 import { sendMail } from './config/mailer.js'; // Importa la función de configuración del correo
-import ticketrouter from './routes/tickets.routes.js';
+//import ticketrouter from './routes/tickets.routes.js';
 
 
 // Obtiene la ruta del directorio actual utilizando import.meta.url
@@ -71,9 +73,9 @@ const MONGO_URL = process.env.MONGO_URL;
 
 // Conexión a la base de datos MongoDB
 mongoose.connect(MONGO_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+ // useNewUrlParser: true,
 })
+
   .then(() => {
     console.log('La base de datos se conectó con éxito');
   })

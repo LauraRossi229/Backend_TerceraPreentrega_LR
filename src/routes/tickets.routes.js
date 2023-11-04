@@ -1,3 +1,4 @@
+/*
 import express from 'express';
 import ticketController from '../controllers/ticketController';
 
@@ -9,3 +10,4 @@ router.post('/tickets', ticketController.createTicket);
 // Otros endpoints para gestionar los tickets
 
 export default ticketrouter;
+*/

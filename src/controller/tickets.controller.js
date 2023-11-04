@@ -1,3 +1,4 @@
+/*
 import Ticket from '../models/ticketModel';
 
 // Crear un nuevo ticket
@@ -71,3 +72,4 @@ const generateUniqueCode = () => {
 export default {
   generateTicket,
 };
+*/

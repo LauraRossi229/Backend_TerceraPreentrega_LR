@@ -15,10 +15,11 @@
     <p>Descripción: {{ product._id}}</p>
   </div>
   <!-- Formulario para agregar al carrito -->
-<form action="/api/carts/{{ userDataD.cart }}" method="PUT">
-  <input type="hidden" name="_method" value="PUT">
+<form action="/api/carts/{{ userDataD.cart }}/products/{{ product._id}}" method="POST">
+  <input type="hidden" name="_method" value="POST">
    <input type="hidden" name="cid" value="{{userDataD.cart}}">
   <input type="hidden" name="productID" value="{{product._id}}">
+  <input type="hidden" name="quantity" value=1>
     <button type="submit">Agregar al carrito</button>
   </form>
   <a href="/api/products">Volver a la lista de productos</a>
