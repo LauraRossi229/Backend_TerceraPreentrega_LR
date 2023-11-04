@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.7.0/dist/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/chat.js"></script>
+  <script src="/js/script.js"></script>
+
+  <title>Chat</title>
+</head>
+<body>
+  <div class="container text-center mt-5"> <!-- Aplicamos clase "text-center" para centrar el contenido -->
+    <h1>Chat</h1>
+
+    <div id="chat-box" class="mt-4">
+      {{#each messages}}
+        <p><strong>{{this.email}}:</strong> {{this.message}}</p>
+      {{/each}}
+    </div>
+
+    <form id="message-form" class="mt-4">
+      <div class="mb-3">
+        <input type="email" id="email-input" name="email" class="form-control" placeholder="Email">
+      </div>
+      <div class="mb-3">
+        <input type="text" id="message-input" name="message" class="form-control" placeholder="Mensaje">
+      </div>
+      <button type="submit" class="btn btn-primary">Enviar</button>
+    </form>
+  </div>
+</body>
+</html>
